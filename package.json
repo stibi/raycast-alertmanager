@@ -1,0 +1,34 @@
+{
+  "name": "alertmanager",
+  "title": "Alertmanager",
+  "description": "Interact with Prometheus Alertmanager",
+  "icon": "extension-icon.png",
+  "author": "stibi",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hello-world",
+      "title": "Hello World",
+      "subtitle": "Alertmanager",
+      "description": "A simple hello world command",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

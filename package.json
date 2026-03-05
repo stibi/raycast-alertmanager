@@ -7,15 +7,23 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "hello-world",
-      "title": "Hello World",
+      "name": "list-alerts",
+      "title": "List Alerts",
       "subtitle": "Alertmanager",
-      "description": "A simple hello world command",
+      "description": "View active alerts from all Alertmanager instances",
+      "mode": "view"
+    },
+    {
+      "name": "manage-instances",
+      "title": "Manage Alertmanager Instances",
+      "subtitle": "Alertmanager",
+      "description": "Add, edit, or remove Alertmanager instances",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.3"
+    "@raycast/api": "^1.93.3",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

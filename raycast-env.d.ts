@@ -13,12 +13,16 @@ type ExtensionPreferences = {}
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `hello-world` command */
-  export type HelloWorld = ExtensionPreferences & {}
+  /** Preferences accessible in the `list-alerts` command */
+  export type ListAlerts = ExtensionPreferences & {}
+  /** Preferences accessible in the `manage-instances` command */
+  export type ManageInstances = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `hello-world` command */
-  export type HelloWorld = {}
+  /** Arguments passed to the `list-alerts` command */
+  export type ListAlerts = {}
+  /** Arguments passed to the `manage-instances` command */
+  export type ManageInstances = {}
 }
 

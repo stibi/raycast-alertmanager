@@ -67,21 +67,13 @@ npm run lint       # Run linter
 npm run fix-lint   # Auto-fix lint issues
 ```
 
-## Packaging and Installing for Daily Use
+## Installing for Daily Use
 
-To use the extension without running `npm run dev` every time:
+Run `npm run dev` once from the project directory. This builds the extension, registers it with Raycast, and enables hot reload for development.
 
-1. **Build the extension:**
+The extension **stays registered in Raycast** even after you stop the dev server or close the terminal — you can use it any time from Raycast without keeping anything running.
 
-   ```sh
-   npm run build
-   ```
-
-2. **Import into Raycast:**
-
-   Open Raycast, run the **Import Extension** command, and select this project directory. Raycast will install the built extension locally.
-
-   Alternatively, you can keep using `npm run dev` — Raycast will remember the extension between sessions. The only difference is that dev mode enables hot reload and shows a development indicator.
+Re-run `npm run dev` only when you make code changes and want to rebuild.
 
 ## Project Structure
 

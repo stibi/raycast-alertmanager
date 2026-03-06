@@ -45,11 +45,6 @@ export default function ManageInstances() {
 
   return (
     <List isLoading={isLoading}>
-      <List.EmptyView
-        title="No Alertmanager Instances"
-        description="Press ⌘+N to add one"
-        icon={Icon.Plus}
-      />
       {instances.map((instance) => (
         <List.Item
           key={instance.id}
@@ -80,23 +75,19 @@ export default function ManageInstances() {
           }
         />
       ))}
-      <List.Section title="">
-        {instances.length > 0 && (
-          <List.Item
-            title=""
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Add Instance"
-                  icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  target={<InstanceForm onSave={loadInstances} />}
-                />
-              </ActionPanel>
-            }
-          />
-        )}
-      </List.Section>
+      <List.Item
+        title="Add Instance..."
+        icon={Icon.Plus}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Add Instance"
+              icon={Icon.Plus}
+              target={<InstanceForm onSave={loadInstances} />}
+            />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }

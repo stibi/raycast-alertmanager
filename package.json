@@ -11,14 +11,16 @@
       "title": "List Alerts",
       "subtitle": "Alertmanager",
       "description": "View active alerts from all Alertmanager instances",
-      "mode": "view"
+      "mode": "view",
+      "icon": "list-alerts.png"
     },
     {
       "name": "manage-instances",
       "title": "Manage Alertmanager Instances",
       "subtitle": "Alertmanager",
       "description": "Add, edit, or remove Alertmanager instances",
-      "mode": "view"
+      "mode": "view",
+      "icon": "manage-instances.png"
     }
   ],
   "dependencies": {

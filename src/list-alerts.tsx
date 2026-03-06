@@ -21,11 +21,35 @@ function instanceColor(index: number): Color {
   return INSTANCE_COLORS[index % INSTANCE_COLORS.length];
 }
 
+type SortOption = "severity" | "age-desc" | "age-asc" | "alertname";
+
+const SEVERITY_ORDER: Record<string, number> = { critical: 0, warning: 1, info: 2 };
+
+function sortAlerts(alerts: AlertWithInstance[], sort: SortOption): AlertWithInstance[] {
+  return [...alerts].sort((a, b) => {
+    switch (sort) {
+      case "severity": {
+        const sa = SEVERITY_ORDER[a.labels.severity] ?? 3;
+        const sb = SEVERITY_ORDER[b.labels.severity] ?? 3;
+        if (sa !== sb) return sa - sb;
+        return new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime();
+      }
+      case "age-desc":
+        return new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime();
+      case "age-asc":
+        return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
+      case "alertname":
+        return (a.labels.alertname || "").localeCompare(b.labels.alertname || "");
+    }
+  });
+}
+
 export default function ListAlerts() {
   const [alerts, setAlerts] = useState<AlertWithInstance[]>([]);
   const [instances, setInstances] = useState<AlertmanagerInstance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedInstance, setSelectedInstance] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<SortOption>("severity");
 
   async function loadAlerts() {
     setIsLoading(true);
@@ -55,7 +79,6 @@ export default function ListAlerts() {
         }
       }
 
-      allAlerts.sort((a, b) => new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
       setAlerts(allAlerts);
     } catch (e) {
       await showToast(Toast.Style.Failure, "Error", String(e));
@@ -67,8 +90,10 @@ export default function ListAlerts() {
     loadAlerts();
   }, []);
 
-  const filteredAlerts =
-    selectedInstance === "all" ? alerts : alerts.filter((a) => a.instance.id === selectedInstance);
+  const filteredAlerts = sortAlerts(
+    selectedInstance === "all" ? alerts : alerts.filter((a) => a.instance.id === selectedInstance),
+    sortBy,
+  );
 
   return (
     <List
@@ -126,6 +151,12 @@ export default function ListAlerts() {
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
                   target={<SilenceForm alert={alert} onSilenced={loadAlerts} />}
                 />
+                <ActionPanel.Submenu title="Sort By" icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+                  <Action title="Severity" icon={sortBy === "severity" ? Icon.Checkmark : undefined} onAction={() => setSortBy("severity")} />
+                  <Action title="Newest First" icon={sortBy === "age-desc" ? Icon.Checkmark : undefined} onAction={() => setSortBy("age-desc")} />
+                  <Action title="Oldest First" icon={sortBy === "age-asc" ? Icon.Checkmark : undefined} onAction={() => setSortBy("age-asc")} />
+                  <Action title="Alert Name" icon={sortBy === "alertname" ? Icon.Checkmark : undefined} onAction={() => setSortBy("alertname")} />
+                </ActionPanel.Submenu>
                 <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadAlerts} />
               </ActionPanel>
             }

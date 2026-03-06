@@ -4,6 +4,7 @@ import { AlertmanagerInstance, AlertWithInstance } from "./types";
 import { getInstances } from "./storage";
 import { fetchAlerts } from "./api";
 import { AlertDetail } from "./alert-detail";
+import { AlertGroupList } from "./alert-group-list";
 import { SilenceForm } from "./silence-form";
 
 const INSTANCE_COLORS: Color[] = [
@@ -95,6 +96,30 @@ export default function ListAlerts() {
     sortBy,
   );
 
+  // Group alerts by alertname, preserving sort order of first occurrence
+  const grouped: { alertname: string; alerts: AlertWithInstance[] }[] = [];
+  const groupMap = new Map<string, AlertWithInstance[]>();
+  for (const alert of filteredAlerts) {
+    const name = alert.labels.alertname || "Unknown Alert";
+    if (!groupMap.has(name)) {
+      const group: AlertWithInstance[] = [];
+      groupMap.set(name, group);
+      grouped.push({ alertname: name, alerts: group });
+    }
+    groupMap.get(name)!.push(alert);
+  }
+
+  function sortActions() {
+    return (
+      <ActionPanel.Submenu title="Sort By" icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+        <Action title="Severity" icon={sortBy === "severity" ? Icon.Checkmark : undefined} onAction={() => setSortBy("severity")} />
+        <Action title="Newest First" icon={sortBy === "age-desc" ? Icon.Checkmark : undefined} onAction={() => setSortBy("age-desc")} />
+        <Action title="Oldest First" icon={sortBy === "age-asc" ? Icon.Checkmark : undefined} onAction={() => setSortBy("age-asc")} />
+        <Action title="Alert Name" icon={sortBy === "alertname" ? Icon.Checkmark : undefined} onAction={() => setSortBy("alertname")} />
+      </ActionPanel.Submenu>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -115,48 +140,80 @@ export default function ListAlerts() {
         description={instances.length === 0 ? 'Use "Manage Alertmanager Instances" to add one' : "All clear!"}
         icon={instances.length === 0 ? Icon.Gear : Icon.CheckCircle}
       />
-      {filteredAlerts.map((alert) => {
-        const instIndex = instances.findIndex((i) => i.id === alert.instance.id);
-        const alertname = alert.labels.alertname || "Unknown Alert";
-        const severity = alert.labels.severity;
+      {grouped.map(({ alertname, alerts: groupAlerts }) => {
+        const isGrouped = groupAlerts.length > 1;
+        const representative = groupAlerts[0];
+        const instIndex = instances.findIndex((i) => i.id === representative.instance.id);
+        const severity = representative.labels.severity;
+        const highestSeverity = groupAlerts.reduce((highest, a) => {
+          const order = SEVERITY_ORDER[a.labels.severity] ?? 3;
+          return order < (SEVERITY_ORDER[highest] ?? 3) ? a.labels.severity : highest;
+        }, representative.labels.severity || "");
+
+        const accessories: List.Item.Accessory[] = [];
+        if (isGrouped) {
+          accessories.push({ text: `${groupAlerts.length}`, icon: Icon.Layers });
+        }
+        const displaySeverity = isGrouped ? highestSeverity : severity;
+        if (displaySeverity) {
+          accessories.push({
+            tag: {
+              value: displaySeverity,
+              color: displaySeverity === "critical" ? Color.Red : displaySeverity === "warning" ? Color.Orange : Color.Yellow,
+            },
+          });
+        }
+        if (isGrouped) {
+          const instanceNames = [...new Set(groupAlerts.map((a) => a.instance.name))];
+          for (const name of instanceNames) {
+            const idx = instances.findIndex((i) => i.name === name);
+            accessories.push({ tag: { value: name, color: instanceColor(idx) } });
+          }
+        } else {
+          accessories.push({ tag: { value: representative.instance.name, color: instanceColor(instIndex) } });
+          accessories.push({ date: new Date(representative.startsAt), tooltip: `Started: ${new Date(representative.startsAt).toLocaleString()}` });
+        }
 
         return (
           <List.Item
-            key={`${alert.instance.id}-${alert.fingerprint}`}
+            key={alertname}
             title={alertname}
-            subtitle={alert.annotations.summary || alert.annotations.description || ""}
-            keywords={[alert.instance.name, ...Object.values(alert.labels)]}
-            accessories={[
-              severity
-                ? {
-                    tag: {
-                      value: severity,
-                      color: severity === "critical" ? Color.Red : severity === "warning" ? Color.Orange : Color.Yellow,
-                    },
-                  }
-                : {},
-              { tag: { value: alert.instance.name, color: instanceColor(instIndex) } },
-              { date: new Date(alert.startsAt), tooltip: `Started: ${new Date(alert.startsAt).toLocaleString()}` },
+            subtitle={isGrouped ? "" : representative.annotations.summary || representative.annotations.description || ""}
+            keywords={[
+              ...groupAlerts.flatMap((a) => [a.instance.name, ...Object.values(a.labels)]),
             ]}
+            accessories={accessories}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Details"
-                  icon={Icon.Eye}
-                  target={<AlertDetail alert={alert} instanceColor={instanceColor(instIndex)} />}
-                />
-                <Action.Push
-                  title="Silence Alert"
-                  icon={Icon.BellDisabled}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
-                  target={<SilenceForm alert={alert} onSilenced={loadAlerts} />}
-                />
-                <ActionPanel.Submenu title="Sort By" icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
-                  <Action title="Severity" icon={sortBy === "severity" ? Icon.Checkmark : undefined} onAction={() => setSortBy("severity")} />
-                  <Action title="Newest First" icon={sortBy === "age-desc" ? Icon.Checkmark : undefined} onAction={() => setSortBy("age-desc")} />
-                  <Action title="Oldest First" icon={sortBy === "age-asc" ? Icon.Checkmark : undefined} onAction={() => setSortBy("age-asc")} />
-                  <Action title="Alert Name" icon={sortBy === "alertname" ? Icon.Checkmark : undefined} onAction={() => setSortBy("alertname")} />
-                </ActionPanel.Submenu>
+                {isGrouped ? (
+                  <Action.Push
+                    title="View Alerts"
+                    icon={Icon.List}
+                    target={
+                      <AlertGroupList
+                        alertname={alertname}
+                        alerts={groupAlerts}
+                        instances={instances}
+                        onSilenced={loadAlerts}
+                      />
+                    }
+                  />
+                ) : (
+                  <>
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.Eye}
+                      target={<AlertDetail alert={representative} instanceColor={instanceColor(instIndex)} />}
+                    />
+                    <Action.Push
+                      title="Silence Alert"
+                      icon={Icon.BellDisabled}
+                      shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      target={<SilenceForm alert={representative} onSilenced={loadAlerts} />}
+                    />
+                  </>
+                )}
+                {sortActions()}
                 <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadAlerts} />
               </ActionPanel>
             }

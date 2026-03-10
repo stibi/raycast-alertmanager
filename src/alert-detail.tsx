@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { AlertWithInstance } from "./types";
 import { SilenceForm } from "./silence-form";
+import { InstantSilenceAction } from "./instant-silence";
+import { SilenceLabelForm } from "./silence-label-form";
 
 export function AlertDetail({ alert, instanceColor }: { alert: AlertWithInstance; instanceColor: Color }) {
   const alertname = alert.labels.alertname || "Unknown Alert";
@@ -76,6 +78,13 @@ ${alert.generatorURL ? `[Open in source](${alert.generatorURL})` : ""}
             icon={Icon.BellDisabled}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             target={<SilenceForm alert={alert} />}
+          />
+          <InstantSilenceAction alert={alert} />
+          <Action.Push
+            title="Silence by Label"
+            icon={Icon.Tag}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            target={<SilenceLabelForm alerts={[alert]} />}
           />
           {alert.generatorURL && (
             <Action.OpenInBrowser title="Open in Source" url={alert.generatorURL} shortcut={{ modifiers: ["cmd"], key: "o" }} />

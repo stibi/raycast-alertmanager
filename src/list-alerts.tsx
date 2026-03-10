@@ -7,6 +7,7 @@ import { AlertDetail } from "./alert-detail";
 import { AlertGroupList } from "./alert-group-list";
 import { SilenceForm } from "./silence-form";
 import { InstantSilenceAction } from "./instant-silence";
+import { SilenceLabelForm } from "./silence-label-form";
 
 const INSTANCE_COLORS: Color[] = [
   Color.Blue,
@@ -385,18 +386,26 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
             actions={
               <ActionPanel>
                 {isGrouped ? (
-                  <Action.Push
-                    title="View Alerts"
-                    icon={Icon.List}
-                    target={
-                      <AlertGroupList
-                        alertname={alertname}
-                        alerts={groupAlerts}
-                        instances={instances}
-                        onSilenced={loadAlerts}
-                      />
-                    }
-                  />
+                  <>
+                    <Action.Push
+                      title="View Alerts"
+                      icon={Icon.List}
+                      target={
+                        <AlertGroupList
+                          alertname={alertname}
+                          alerts={groupAlerts}
+                          instances={instances}
+                          onSilenced={loadAlerts}
+                        />
+                      }
+                    />
+                    <Action.Push
+                      title="Silence by Label"
+                      icon={Icon.Tag}
+                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                      target={<SilenceLabelForm alerts={groupAlerts} onSilenced={loadAlerts} />}
+                    />
+                  </>
                 ) : (
                   <>
                     <Action.Push
@@ -411,6 +420,12 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
                       target={<SilenceForm alert={representative} onSilenced={loadAlerts} />}
                     />
                     <InstantSilenceAction alert={representative} onSilenced={loadAlerts} />
+                    <Action.Push
+                      title="Silence by Label"
+                      icon={Icon.Tag}
+                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                      target={<SilenceLabelForm alerts={[representative]} onSilenced={loadAlerts} />}
+                    />
                   </>
                 )}
                 {sortActions()}

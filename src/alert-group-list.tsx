@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { AlertmanagerInstance, AlertWithInstance } from "./types";
 import { AlertDetail } from "./alert-detail";
 import { SilenceForm } from "./silence-form";
 import { InstantSilenceAction } from "./instant-silence";
+import { SilenceLabelForm } from "./silence-label-form";
 
 const INSTANCE_COLORS: Color[] = [
   Color.Blue,
@@ -31,6 +32,7 @@ export function AlertGroupList({
   instances: AlertmanagerInstance[];
   onSilenced?: () => void;
 }) {
+  const { pop: popGroupList } = useNavigation();
   return (
     <List navigationTitle={`${alertname} (${alerts.length})`} searchBarPlaceholder="Filter alerts...">
       {alerts.map((alert) => {
@@ -73,6 +75,12 @@ export function AlertGroupList({
                   target={<SilenceForm alert={alert} onSilenced={onSilenced} />}
                 />
                 <InstantSilenceAction alert={alert} onSilenced={onSilenced} />
+                <Action.Push
+                  title="Silence by Label"
+                  icon={Icon.Tag}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  target={<SilenceLabelForm alerts={[alert]} onSilenced={onSilenced} popParent={popGroupList} />}
+                />
               </ActionPanel>
             }
           />

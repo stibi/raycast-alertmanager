@@ -3,6 +3,8 @@ import { AlertmanagerInstance } from "./types";
 
 const INSTANCES_KEY = "alertmanager-instances";
 const LAST_SILENCE_DURATION_KEY = "last-silence-duration";
+const LAST_SILENCE_AUTHOR_KEY = "last-silence-author";
+const LAST_SILENCE_COMMENT_KEY = "last-silence-comment";
 
 export async function getInstances(): Promise<AlertmanagerInstance[]> {
   const json = await LocalStorage.getItem<string>(INSTANCES_KEY);
@@ -41,4 +43,20 @@ export async function getLastSilenceDuration(): Promise<number> {
 
 export async function setLastSilenceDuration(hours: number): Promise<void> {
   await LocalStorage.setItem(LAST_SILENCE_DURATION_KEY, hours);
+}
+
+export async function getLastSilenceAuthor(): Promise<string> {
+  return (await LocalStorage.getItem<string>(LAST_SILENCE_AUTHOR_KEY)) ?? "";
+}
+
+export async function setLastSilenceAuthor(author: string): Promise<void> {
+  await LocalStorage.setItem(LAST_SILENCE_AUTHOR_KEY, author);
+}
+
+export async function getLastSilenceComment(): Promise<string> {
+  return (await LocalStorage.getItem<string>(LAST_SILENCE_COMMENT_KEY)) ?? "";
+}
+
+export async function setLastSilenceComment(comment: string): Promise<void> {
+  await LocalStorage.setItem(LAST_SILENCE_COMMENT_KEY, comment);
 }

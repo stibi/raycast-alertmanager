@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { AlertmanagerInstance, AlertWithInstance } from "./types";
 import { AlertDetail } from "./alert-detail";
 import { SilenceForm } from "./silence-form";
+import { InstantSilenceAction } from "./instant-silence";
 
 const INSTANCE_COLORS: Color[] = [
   Color.Blue,
@@ -71,6 +72,7 @@ export function AlertGroupList({
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
                   target={<SilenceForm alert={alert} onSilenced={onSilenced} />}
                 />
+                <InstantSilenceAction alert={alert} onSilenced={onSilenced} />
               </ActionPanel>
             }
           />

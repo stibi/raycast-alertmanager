@@ -6,6 +6,7 @@ import { fetchAlerts } from "./api";
 import { AlertDetail } from "./alert-detail";
 import { AlertGroupList } from "./alert-group-list";
 import { SilenceForm } from "./silence-form";
+import { InstantSilenceAction } from "./instant-silence";
 
 const INSTANCE_COLORS: Color[] = [
   Color.Blue,
@@ -409,6 +410,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
                       shortcut={{ modifiers: ["cmd"], key: "s" }}
                       target={<SilenceForm alert={representative} onSilenced={loadAlerts} />}
                     />
+                    <InstantSilenceAction alert={representative} onSilenced={loadAlerts} />
                   </>
                 )}
                 {sortActions()}

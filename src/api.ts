@@ -9,6 +9,15 @@ function headers(instance: AlertmanagerInstance): Record<string, string> {
   return h;
 }
 
+export async function testConnection(instance: AlertmanagerInstance): Promise<void> {
+  const response = await fetch(`${instance.url}/api/v2/status`, {
+    headers: headers(instance),
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+}
+
 export async function fetchAlerts(instance: AlertmanagerInstance): Promise<Alert[]> {
   const response = await fetch(`${instance.url}/api/v2/alerts?silenced=false&inhibited=false`, {
     headers: headers(instance),

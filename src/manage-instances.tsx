@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import { AlertmanagerInstance } from "./types";
 import { addInstance, getInstances, removeInstance, updateInstance } from "./storage";
+import { testConnection } from "./api";
 import { randomUUID } from "crypto";
 
 export default function ManageInstances() {
@@ -94,10 +95,36 @@ export default function ManageInstances() {
 
 function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; onSave: () => void }) {
   const { pop } = useNavigation();
+  const [validated, setValidated] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+
+  async function handleTest(values: { name: string; url: string; username: string; password: string }) {
+    if (!values.url.trim()) {
+      await showToast(Toast.Style.Failure, "URL is required");
+      return;
+    }
+
+    setIsTesting(true);
+    try {
+      const url = values.url.replace(/\/+$/, "");
+      await testConnection({ id: "", name: "", url, username: values.username, password: values.password });
+      setValidated(true);
+      await showToast(Toast.Style.Success, "Connection Successful");
+    } catch (e) {
+      setValidated(false);
+      await showToast(Toast.Style.Failure, "Connection Failed", String(e));
+    }
+    setIsTesting(false);
+  }
 
   async function handleSubmit(values: { name: string; url: string; username: string; password: string }) {
     if (!values.name.trim() || !values.url.trim()) {
       await showToast(Toast.Style.Failure, "Name and URL are required");
+      return;
+    }
+
+    if (!validated) {
+      await showToast(Toast.Style.Failure, "Test the connection first");
       return;
     }
 
@@ -117,9 +144,13 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
   return (
     <Form
       navigationTitle={instance ? "Edit Instance" : "Add Instance"}
+      isLoading={isTesting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={instance ? "Update" : "Add"} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Test Connection" icon={Icon.Wifi} onSubmit={handleTest} />
+          {validated && (
+            <Action.SubmitForm title={instance ? "Save" : "Add"} icon={Icon.Check} onSubmit={handleSubmit} />
+          )}
         </ActionPanel>
       }
     >
@@ -129,10 +160,25 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
         title="URL"
         placeholder="https://alertmanager.example.com"
         defaultValue={instance?.url ?? ""}
+        onChange={() => setValidated(false)}
       />
       <Form.Separator />
-      <Form.TextField id="username" title="Username" placeholder="optional" defaultValue={instance?.username ?? ""} />
-      <Form.PasswordField id="password" title="Password" placeholder="optional" defaultValue={instance?.password ?? ""} />
+      <Form.TextField
+        id="username"
+        title="Username"
+        placeholder="optional"
+        defaultValue={instance?.username ?? ""}
+        onChange={() => setValidated(false)}
+      />
+      <Form.PasswordField
+        id="password"
+        title="Password"
+        placeholder="optional"
+        defaultValue={instance?.password ?? ""}
+        onChange={() => setValidated(false)}
+      />
+      <Form.Separator />
+      <Form.Description text={validated ? "✅ Connection verified" : "⚠️ Test the connection before saving"} />
     </Form>
   );
 }

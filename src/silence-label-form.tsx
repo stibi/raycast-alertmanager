@@ -59,46 +59,65 @@ export function SilenceLabelForm({
     });
   }
 
+  const continueTarget = selected.size > 0 ? (
+    <SilenceLabelConfirm
+      selectedLabels={uniqueLabels.filter((l) => selected.has(l.id))}
+      instances={instances}
+      onSilenced={onSilenced}
+      popLabelPicker={popLabelPicker}
+      popParent={popParent}
+    />
+  ) : undefined;
+
   return (
     <List
       navigationTitle="Silence by Label"
       searchBarPlaceholder="Search labels..."
     >
-      {uniqueLabels.map((label) => {
-        const isSelected = selected.has(label.id);
-        return (
+      {continueTarget && (
+        <List.Section title="Actions">
           <List.Item
-            key={label.id}
-            title={label.id}
-            icon={isSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+            key="__continue__"
+            title={`Continue with ${selected.size} label${selected.size !== 1 ? "s" : ""}`}
+            icon={{ source: Icon.ArrowRight, tintColor: Color.Green }}
+            accessories={[{ tag: { value: "Enter", color: Color.Green } }]}
             actions={
               <ActionPanel>
-                <Action
-                  title={isSelected ? "Deselect" : "Select"}
-                  icon={isSelected ? Icon.Circle : Icon.Checkmark}
-                  onAction={() => toggleLabel(label.id)}
-                />
-                {selected.size > 0 && (
-                  <Action.Push
-                    title={`Continue with ${selected.size} Label${selected.size !== 1 ? "s" : ""}`}
-                    icon={Icon.ArrowRight}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
-                    target={
-                      <SilenceLabelConfirm
-                        selectedLabels={uniqueLabels.filter((l) => selected.has(l.id))}
-                        instances={instances}
-                        onSilenced={onSilenced}
-                        popLabelPicker={popLabelPicker}
-                        popParent={popParent}
-                      />
-                    }
-                  />
-                )}
+                <Action.Push title="Continue" icon={Icon.ArrowRight} target={continueTarget} />
               </ActionPanel>
             }
           />
-        );
-      })}
+        </List.Section>
+      )}
+      <List.Section title="Labels">
+        {uniqueLabels.map((label) => {
+          const isSelected = selected.has(label.id);
+          return (
+            <List.Item
+              key={label.id}
+              title={label.id}
+              icon={isSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={isSelected ? "Deselect" : "Select"}
+                    icon={isSelected ? Icon.Circle : Icon.Checkmark}
+                    onAction={() => toggleLabel(label.id)}
+                  />
+                  {continueTarget && (
+                    <Action.Push
+                      title={`Continue with ${selected.size} Label${selected.size !== 1 ? "s" : ""}`}
+                      icon={Icon.ArrowRight}
+                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      target={continueTarget}
+                    />
+                  )}
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }

@@ -112,7 +112,7 @@ function generateSummarySVG(
 
   const headerY = 44;
   p.push(`<text x="${pad}" y="${headerY}" font-family="-apple-system, sans-serif" font-size="22" font-weight="700" fill="${accentHex}" letter-spacing="1.5">${escapeXml(name.toUpperCase())}</text>`);
-  p.push(`<text x="${w - pad}" y="${headerY}" font-family="-apple-system, sans-serif" font-size="22" font-weight="800" fill="${textPrimary}" text-anchor="end">${total}</text>`);
+  p.push(`<text x="${w - pad}" y="${headerY + 36}" font-family="-apple-system, sans-serif" font-size="64" font-weight="800" fill="${textPrimary}" text-anchor="end">${total}</text>`);
 
   if (total === 0) {
     p.push(`<text x="${pad}" y="${headerY + 48}" font-family="-apple-system, sans-serif" font-size="22" fill="#30D158" font-weight="600">No active alerts</text>`);

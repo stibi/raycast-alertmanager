@@ -6,6 +6,7 @@ import {
   List,
   useNavigation,
 } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { AlertmanagerInstance, AlertWithInstance } from "./types";
 import { AlertDetail } from "./alert-detail";
 import { SilenceForm } from "./silence-form";
@@ -94,14 +95,14 @@ export function AlertGroupList({
                 <Action.Push
                   title="Silence Alert"
                   icon={Icon.BellDisabled}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  shortcut={Shortcuts.Silence}
                   target={<SilenceForm alert={alert} onSilenced={onSilenced} />}
                 />
                 <InstantSilenceAction alert={alert} onSilenced={onSilenced} />
                 <Action.Push
                   title="Silence by Label"
                   icon={Icon.Tag}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  shortcut={Shortcuts.SilenceByLabel}
                   target={
                     <SilenceLabelForm
                       alerts={[alert]}

@@ -1,5 +1,6 @@
 import {
   Action,
+  Keyboard,
   ActionPanel,
   Alert as RaycastAlert,
   confirmAlert,
@@ -83,7 +84,7 @@ export default function ManageInstances() {
               <Action.Push
                 title="Add Instance"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<InstanceForm onSave={loadInstances} />}
               />
             </ActionPanel>

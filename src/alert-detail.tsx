@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import {
+  Action,
+  Keyboard,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+} from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { AlertWithInstance } from "./types";
 import { SilenceForm } from "./silence-form";
 import { InstantSilenceAction } from "./instant-silence";
@@ -91,21 +99,21 @@ ${alert.generatorURL ? `[Open in source](${alert.generatorURL})` : ""}
           <Action.Push
             title="Silence Alert"
             icon={Icon.BellDisabled}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={Shortcuts.Silence}
             target={<SilenceForm alert={alert} />}
           />
           <InstantSilenceAction alert={alert} />
           <Action.Push
             title="Silence by Label"
             icon={Icon.Tag}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={Shortcuts.SilenceByLabel}
             target={<SilenceLabelForm alerts={[alert]} />}
           />
           {alert.generatorURL && (
             <Action.OpenInBrowser
               title="Open in Source"
               url={alert.generatorURL}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           )}
           <Action.CopyToClipboard

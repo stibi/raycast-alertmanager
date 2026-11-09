@@ -1,4 +1,5 @@
 import { Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useCallback } from "react";
 import { AlertWithInstance, SilenceMatcher } from "./types";
 import { createSilence } from "./api";
@@ -56,7 +57,7 @@ export function InstantSilenceAction({
     <Action
       title="Instant Silence"
       icon={Icon.BoltDisabled}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+      shortcut={Shortcuts.InstantSilence}
       onAction={handleInstantSilence}
     />
   );

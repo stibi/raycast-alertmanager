@@ -1,5 +1,6 @@
 import {
   Action,
+  Keyboard,
   ActionPanel,
   Color,
   environment,
@@ -9,6 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import { AlertmanagerInstance, AlertWithInstance } from "./types";
 import { getInstances } from "./storage";
@@ -288,7 +290,7 @@ function InstanceSummary({ instances }: { instances: AlertmanagerInstance[] }) {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={loadSummaries}
                 />
               </ActionPanel>
@@ -377,9 +379,9 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
   function sortActions() {
     return (
       <ActionPanel.Submenu
-        title="Sort By"
+        title="Sort by"
         icon={Icon.ArrowUp}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        shortcut={Shortcuts.SortBy}
       >
         <Action
           title="Severity"
@@ -536,7 +538,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
                     <Action.Push
                       title="Silence by Label"
                       icon={Icon.Tag}
-                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                      shortcut={Shortcuts.SilenceByLabel}
                       target={
                         <SilenceLabelForm
                           alerts={groupAlerts}
@@ -560,7 +562,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
                     <Action.Push
                       title="Silence Alert"
                       icon={Icon.BellDisabled}
-                      shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      shortcut={Shortcuts.Silence}
                       target={
                         <SilenceForm
                           alert={representative}
@@ -575,7 +577,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
                     <Action.Push
                       title="Silence by Label"
                       icon={Icon.Tag}
-                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                      shortcut={Shortcuts.SilenceByLabel}
                       target={
                         <SilenceLabelForm
                           alerts={[representative]}
@@ -589,7 +591,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={loadAlerts}
                 />
               </ActionPanel>

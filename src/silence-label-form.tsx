@@ -18,6 +18,11 @@ import {
 } from "./types";
 import { createSilence } from "./api";
 import {
+  collectUniqueInstances,
+  collectUniqueLabels,
+  LabelEntry,
+} from "./alert-utils";
+import {
   getLastSilenceAuthor,
   getLastSilenceComment,
   getLastSilenceDuration,
@@ -25,38 +30,6 @@ import {
   setLastSilenceComment,
   setLastSilenceDuration,
 } from "./storage";
-
-interface LabelEntry {
-  key: string;
-  value: string;
-  id: string;
-}
-
-function collectUniqueLabels(alerts: AlertWithInstance[]): LabelEntry[] {
-  const labels: LabelEntry[] = [];
-  const seen = new Set<string>();
-  for (const alert of alerts) {
-    for (const [key, value] of Object.entries(alert.labels)) {
-      const id = `${key}=${value}`;
-      if (!seen.has(id)) {
-        seen.add(id);
-        labels.push({ key, value, id });
-      }
-    }
-  }
-  labels.sort((a, b) => a.id.localeCompare(b.id));
-  return labels;
-}
-
-function collectUniqueInstances(
-  alerts: AlertWithInstance[],
-): AlertmanagerInstance[] {
-  const map = new Map<string, AlertmanagerInstance>();
-  for (const alert of alerts) {
-    map.set(alert.instance.id, alert.instance);
-  }
-  return [...map.values()];
-}
 
 /* ─── Screen 1: Label Picker ─── */
 

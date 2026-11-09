@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { Alert, AlertmanagerInstance, Silence, SilenceMatcher } from "./types";
 
 function headers(instance: AlertmanagerInstance): Record<string, string> {

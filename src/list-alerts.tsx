@@ -20,6 +20,13 @@ import { AlertGroupList } from "./alert-group-list";
 import { SilenceForm } from "./silence-form";
 import { InstantSilenceAction } from "./instant-silence";
 import { SilenceLabelForm } from "./silence-label-form";
+import {
+  escapeXml,
+  groupByAlertname,
+  highestSeverityOf,
+  SortOption,
+  sortAlerts,
+} from "./alert-utils";
 
 const INSTANCE_COLORS: Color[] = [
   Color.Blue,
@@ -34,38 +41,6 @@ const INSTANCE_COLORS: Color[] = [
 
 function instanceColor(index: number): Color {
   return INSTANCE_COLORS[index % INSTANCE_COLORS.length];
-}
-
-type SortOption = "severity" | "age-desc" | "age-asc" | "alertname";
-
-const SEVERITY_ORDER: Record<string, number> = {
-  critical: 0,
-  warning: 1,
-  info: 2,
-};
-
-function sortAlerts(
-  alerts: AlertWithInstance[],
-  sort: SortOption,
-): AlertWithInstance[] {
-  return [...alerts].sort((a, b) => {
-    switch (sort) {
-      case "severity": {
-        const sa = SEVERITY_ORDER[a.labels.severity] ?? 3;
-        const sb = SEVERITY_ORDER[b.labels.severity] ?? 3;
-        if (sa !== sb) return sa - sb;
-        return new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime();
-      }
-      case "age-desc":
-        return new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime();
-      case "age-asc":
-        return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
-      case "alertname":
-        return (a.labels.alertname || "").localeCompare(
-          b.labels.alertname || "",
-        );
-    }
-  });
 }
 
 /* ─── Instance Summary Grid ─── */
@@ -107,15 +82,6 @@ function blendColors(
   const g = Math.round(bg[1] + (fg[1] - bg[1]) * alpha);
   const b = Math.round(bg[2] + (fg[2] - bg[2]) * alpha);
   return `rgb(${r},${g},${b})`;
-}
-
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
 function generateSummarySVG(
@@ -361,18 +327,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
     sortBy,
   );
 
-  // Group alerts by alertname, preserving sort order of first occurrence
-  const grouped: { alertname: string; alerts: AlertWithInstance[] }[] = [];
-  const groupMap = new Map<string, AlertWithInstance[]>();
-  for (const alert of filteredAlerts) {
-    const name = alert.labels.alertname || "Unknown Alert";
-    if (!groupMap.has(name)) {
-      const group: AlertWithInstance[] = [];
-      groupMap.set(name, group);
-      grouped.push({ alertname: name, alerts: group });
-    }
-    groupMap.get(name)!.push(alert);
-  }
+  const grouped = groupByAlertname(filteredAlerts);
 
   const showDropdown = !filterInstanceId && instances.length > 1;
 
@@ -450,12 +405,7 @@ function AlertsList({ filterInstanceId }: { filterInstanceId?: string } = {}) {
           (i) => i.id === representative.instance.id,
         );
         const severity = representative.labels.severity;
-        const highestSeverity = groupAlerts.reduce((highest, a) => {
-          const order = SEVERITY_ORDER[a.labels.severity] ?? 3;
-          return order < (SEVERITY_ORDER[highest] ?? 3)
-            ? a.labels.severity
-            : highest;
-        }, representative.labels.severity || "");
+        const highestSeverity = highestSeverityOf(groupAlerts);
 
         const accessories: List.Item.Accessory[] = [];
         if (isGrouped) {

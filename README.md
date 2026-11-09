@@ -1,89 +1,84 @@
-# Alertmanager Raycast Extension
+# Alertmanager
 
-A Raycast extension for interacting with [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/). View active alerts, inspect details, and create silences — across multiple Alertmanager instances.
+View, inspect and silence [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) alerts from Raycast, across any number of Alertmanager instances.
 
 ## Features
 
-- **List active alerts** from all configured Alertmanager instances in a single view
-- **Color-coded instance tags** so you always know which alert comes from where
-- **Filter by instance** using the dropdown when you have multiple sources
-- **Alert detail view** with all labels, annotations, timing, receivers, and a link to the alert source
-- **Silence alerts** with duration presets (1h, 2h, 4h, 8h, 24h, 3d, 7d) — remembers your last choice
-- **Manage instances** — add, edit, and remove Alertmanager connections with basic auth support
+- **Instance overview.** With more than one instance, you start on a grid of summary cards showing alert counts by severity for each instance.
+- **Alert list.** Active alerts (not silenced, not inhibited) from all instances, grouped by `alertname`, with a colored tag for each instance. Sort by severity (default), newest, oldest or alert name.
+- **Alert details.** Labels, annotations, start time, receivers, fingerprint and a link to the alert's source.
+- **Silences.** Three ways to silence an alert:
+  - **Silence Alert** opens a form with duration presets (1h to 7d), author and comment. It remembers what you entered last time.
+  - **Instant Silence** silences the alert right away using your last duration, author and comment.
+  - **Silence by Label** lets you pick labels from one or more alerts and builds the silence matchers from them.
+- **Instance management.** Add, edit and remove Alertmanager instances, with optional basic auth. A connection test must pass before an instance is saved.
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **List Alerts** | View active (non-silenced, non-inhibited) alerts from all instances |
-| **Manage Alertmanager Instances** | Add, edit, or remove Alertmanager connections |
-
-### Keyboard Shortcuts (in alert list/detail)
-
-| Shortcut | Action |
-|----------|--------|
-| `Enter` | View alert details |
-| `⌘ S` | Silence alert |
-| `⌘ R` | Refresh alerts |
-| `⌘ O` | Open alert source URL (in detail view) |
-| `⌘ C` | Copy alert name (in detail view) |
+| Command                           | Description                                |
+| --------------------------------- | ------------------------------------------ |
+| **List Alerts**                   | Instance overview and active alerts        |
+| **Manage Alertmanager Instances** | Add, edit or remove Alertmanager instances |
 
 ## Setup
 
-### Prerequisites
+1. Run **Manage Alertmanager Instances**.
+2. Choose **Add Instance** (`⌘ N`).
+3. Enter a name, the base URL (for example `https://alertmanager.example.com`, without `/api/v2`) and, if needed, a username and password for basic auth.
+4. Run **Test Connection**, then save.
 
-- [Raycast](https://raycast.com/) installed
-- [Node.js](https://nodejs.org/) 18+
-- npm
+Repeat for each instance. Instances are stored in Raycast's local storage on your Mac, which Raycast encrypts.
 
-### Install Dependencies
+The extension uses the Alertmanager v2 API (`/api/v2/alerts`, `/api/v2/silences`, `/api/v2/status`).
 
-```sh
-npm install
-```
+## Keyboard Shortcuts
 
-### Configure Instances
-
-1. Open Raycast and run **Manage Alertmanager Instances**
-2. Press `⌘ N` to add a new instance
-3. Fill in the name, URL (e.g. `https://alertmanager.example.com`), and optionally basic auth credentials
-4. Repeat for each Alertmanager instance
+| Shortcut | Action                          |
+| -------- | ------------------------------- |
+| `↵`      | View alerts or alert details    |
+| `⌘ S`    | Silence Alert (form)            |
+| `⌘ ⇧ S`  | Instant Silence                 |
+| `⌘ L`    | Silence by Label                |
+| `⌘ R`    | Refresh                         |
+| `⌘ O`    | Open alert source (detail view) |
+| `⌘ C`    | Copy alert name (detail view)   |
 
 ## Development
 
-Start the extension in dev mode with hot reload:
+Requires Node.js 22.22.2 or later.
 
 ```sh
-npm run dev
+npm install
+npm run dev        # build, register with Raycast, hot reload
 ```
 
-This compiles the extension and connects it to Raycast. Any changes to the source files will trigger a rebuild automatically. Open Raycast and search for "List Alerts" or "Manage Alertmanager Instances" to test.
+`npm run dev` registers the extension with Raycast. It stays installed after you stop the dev server. To update the installed copy later without the dev server, run `npm run build`, which writes to the same location Raycast loads it from.
 
-Other useful commands:
+| Script              | What it does                                      |
+| ------------------- | ------------------------------------------------- |
+| `npm run build`     | Production build                                  |
+| `npm run lint`      | ESLint, Prettier and manifest checks (`ray lint`) |
+| `npm run fix-lint`  | Auto-fix lint and formatting                      |
+| `npm run typecheck` | TypeScript check, including tests                 |
+| `npm test`          | Unit tests (`node:test` + `tsx`)                  |
 
-```sh
-npm run build      # One-off production build
-npm run lint       # Run linter
-npm run fix-lint   # Auto-fix lint issues
-```
+CI runs lint, typecheck, tests and build on every push and pull request.
 
-## Installing for Daily Use
-
-Run `npm run dev` once from the project directory. This builds the extension, registers it with Raycast, and enables hot reload for development.
-
-The extension **stays registered in Raycast** even after you stop the dev server or close the terminal — you can use it any time from Raycast without keeping anything running.
-
-Re-run `npm run dev` only when you make code changes and want to rebuild.
-
-## Project Structure
+### Project Structure
 
 ```
 src/
-├── api.ts                 # Alertmanager HTTP client (v2 API)
-├── types.ts               # TypeScript types and constants
-├── storage.ts             # Instance config and preferences (LocalStorage)
-├── list-alerts.tsx         # Main command — alert list view
-├── alert-detail.tsx        # Alert detail view (push navigation)
-├── silence-form.tsx        # Silence creation form
-└── manage-instances.tsx    # Instance management command
+├── list-alerts.tsx         # List Alerts command: instance grid and alert list
+├── alert-group-list.tsx    # Alerts sharing one alertname
+├── alert-detail.tsx        # Alert detail view
+├── silence-form.tsx        # Silence form
+├── instant-silence.tsx     # One-key silence action
+├── silence-label-form.tsx  # Silence by label: label picker and confirm form
+├── manage-instances.tsx    # Manage Instances command
+├── alert-utils.ts          # Pure helpers: sorting, grouping, label collection
+├── api.ts                  # Alertmanager v2 API client
+├── storage.ts              # Instances and remembered silence settings
+├── shortcuts.ts            # Extension-specific keyboard shortcuts
+└── types.ts                # Types and constants
+test/                       # Unit tests
 ```

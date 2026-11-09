@@ -12,7 +12,12 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AlertmanagerInstance } from "./types";
-import { addInstance, getInstances, removeInstance, updateInstance } from "./storage";
+import {
+  addInstance,
+  getInstances,
+  removeInstance,
+  updateInstance,
+} from "./storage";
 import { testConnection } from "./api";
 import { randomUUID } from "crypto";
 
@@ -35,7 +40,10 @@ export default function ManageInstances() {
       await confirmAlert({
         title: "Remove Instance",
         message: `Remove "${instance.name}"?`,
-        primaryAction: { title: "Remove", style: RaycastAlert.ActionStyle.Destructive },
+        primaryAction: {
+          title: "Remove",
+          style: RaycastAlert.ActionStyle.Destructive,
+        },
       })
     ) {
       await removeInstance(instance.id);
@@ -51,13 +59,19 @@ export default function ManageInstances() {
           key={instance.id}
           title={instance.name}
           subtitle={instance.url}
-          accessories={[instance.username ? { tag: "auth", icon: Icon.Lock } : { tag: "no auth", icon: Icon.LockUnlocked }]}
+          accessories={[
+            instance.username
+              ? { tag: "auth", icon: Icon.Lock }
+              : { tag: "no auth", icon: Icon.LockUnlocked },
+          ]}
           actions={
             <ActionPanel>
               <Action.Push
                 title="Edit Instance"
                 icon={Icon.Pencil}
-                target={<InstanceForm instance={instance} onSave={loadInstances} />}
+                target={
+                  <InstanceForm instance={instance} onSave={loadInstances} />
+                }
               />
               <Action
                 title="Remove Instance"
@@ -93,12 +107,23 @@ export default function ManageInstances() {
   );
 }
 
-function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; onSave: () => void }) {
+function InstanceForm({
+  instance,
+  onSave,
+}: {
+  instance?: AlertmanagerInstance;
+  onSave: () => void;
+}) {
   const { pop } = useNavigation();
   const [validated, setValidated] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
-  async function handleTest(values: { name: string; url: string; username: string; password: string }) {
+  async function handleTest(values: {
+    name: string;
+    url: string;
+    username: string;
+    password: string;
+  }) {
     if (!values.url.trim()) {
       await showToast(Toast.Style.Failure, "URL is required");
       return;
@@ -107,7 +132,13 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
     setIsTesting(true);
     try {
       const url = values.url.replace(/\/+$/, "");
-      await testConnection({ id: "", name: "", url, username: values.username, password: values.password });
+      await testConnection({
+        id: "",
+        name: "",
+        url,
+        username: values.username,
+        password: values.password,
+      });
       setValidated(true);
       await showToast(Toast.Style.Success, "Connection Successful");
     } catch (e) {
@@ -117,7 +148,12 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
     setIsTesting(false);
   }
 
-  async function handleSubmit(values: { name: string; url: string; username: string; password: string }) {
+  async function handleSubmit(values: {
+    name: string;
+    url: string;
+    username: string;
+    password: string;
+  }) {
     if (!values.name.trim() || !values.url.trim()) {
       await showToast(Toast.Style.Failure, "Name and URL are required");
       return;
@@ -131,10 +167,22 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
     const url = values.url.replace(/\/+$/, "");
 
     if (instance) {
-      await updateInstance({ ...instance, name: values.name, url, username: values.username, password: values.password });
+      await updateInstance({
+        ...instance,
+        name: values.name,
+        url,
+        username: values.username,
+        password: values.password,
+      });
       await showToast(Toast.Style.Success, "Updated", values.name);
     } else {
-      await addInstance({ id: randomUUID(), name: values.name, url, username: values.username, password: values.password });
+      await addInstance({
+        id: randomUUID(),
+        name: values.name,
+        url,
+        username: values.username,
+        password: values.password,
+      });
       await showToast(Toast.Style.Success, "Added", values.name);
     }
     onSave();
@@ -147,14 +195,27 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
       isLoading={isTesting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Test Connection" icon={Icon.Wifi} onSubmit={handleTest} />
+          <Action.SubmitForm
+            title="Test Connection"
+            icon={Icon.Wifi}
+            onSubmit={handleTest}
+          />
           {validated && (
-            <Action.SubmitForm title={instance ? "Save" : "Add"} icon={Icon.Check} onSubmit={handleSubmit} />
+            <Action.SubmitForm
+              title={instance ? "Save" : "Add"}
+              icon={Icon.Check}
+              onSubmit={handleSubmit}
+            />
           )}
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" placeholder="Production" defaultValue={instance?.name ?? ""} />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="Production"
+        defaultValue={instance?.name ?? ""}
+      />
       <Form.TextField
         id="url"
         title="URL"
@@ -178,7 +239,13 @@ function InstanceForm({ instance, onSave }: { instance?: AlertmanagerInstance; o
         onChange={() => setValidated(false)}
       />
       <Form.Separator />
-      <Form.Description text={validated ? "✅ Connection verified" : "⚠️ Test the connection before saving"} />
+      <Form.Description
+        text={
+          validated
+            ? "✅ Connection verified"
+            : "⚠️ Test the connection before saving"
+        }
+      />
     </Form>
   );
 }

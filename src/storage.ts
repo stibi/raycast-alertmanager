@@ -12,17 +12,23 @@ export async function getInstances(): Promise<AlertmanagerInstance[]> {
   return JSON.parse(json);
 }
 
-export async function saveInstances(instances: AlertmanagerInstance[]): Promise<void> {
+export async function saveInstances(
+  instances: AlertmanagerInstance[],
+): Promise<void> {
   await LocalStorage.setItem(INSTANCES_KEY, JSON.stringify(instances));
 }
 
-export async function addInstance(instance: AlertmanagerInstance): Promise<void> {
+export async function addInstance(
+  instance: AlertmanagerInstance,
+): Promise<void> {
   const instances = await getInstances();
   instances.push(instance);
   await saveInstances(instances);
 }
 
-export async function updateInstance(instance: AlertmanagerInstance): Promise<void> {
+export async function updateInstance(
+  instance: AlertmanagerInstance,
+): Promise<void> {
   const instances = await getInstances();
   const index = instances.findIndex((i) => i.id === instance.id);
   if (index >= 0) {

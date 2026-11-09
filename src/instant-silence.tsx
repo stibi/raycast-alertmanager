@@ -2,7 +2,11 @@ import { Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback } from "react";
 import { AlertWithInstance, SilenceMatcher } from "./types";
 import { createSilence } from "./api";
-import { getLastSilenceAuthor, getLastSilenceComment, getLastSilenceDuration } from "./storage";
+import {
+  getLastSilenceAuthor,
+  getLastSilenceComment,
+  getLastSilenceDuration,
+} from "./storage";
 import { SilenceForm } from "./silence-form";
 
 export function InstantSilenceAction({
@@ -27,15 +31,21 @@ export function InstantSilenceAction({
     }
 
     try {
-      const matchers: SilenceMatcher[] = Object.entries(alert.labels).map(([name, value]) => ({
-        name,
-        value,
-        isRegex: false,
-        isEqual: true,
-      }));
+      const matchers: SilenceMatcher[] = Object.entries(alert.labels).map(
+        ([name, value]) => ({
+          name,
+          value,
+          isRegex: false,
+          isEqual: true,
+        }),
+      );
 
       await createSilence(alert.instance, matchers, duration, author, comment);
-      await showToast(Toast.Style.Success, "Silence Created", `${alert.labels.alertname} on ${alert.instance.name}`);
+      await showToast(
+        Toast.Style.Success,
+        "Silence Created",
+        `${alert.labels.alertname} on ${alert.instance.name}`,
+      );
       onSilenced?.();
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed", String(e));

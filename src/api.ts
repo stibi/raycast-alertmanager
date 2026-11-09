@@ -4,12 +4,18 @@ import { Alert, AlertmanagerInstance, Silence, SilenceMatcher } from "./types";
 function headers(instance: AlertmanagerInstance): Record<string, string> {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   if (instance.username && instance.password) {
-    h["Authorization"] = "Basic " + Buffer.from(`${instance.username}:${instance.password}`).toString("base64");
+    h["Authorization"] =
+      "Basic " +
+      Buffer.from(`${instance.username}:${instance.password}`).toString(
+        "base64",
+      );
   }
   return h;
 }
 
-export async function testConnection(instance: AlertmanagerInstance): Promise<void> {
+export async function testConnection(
+  instance: AlertmanagerInstance,
+): Promise<void> {
   const response = await fetch(`${instance.url}/api/v2/status`, {
     headers: headers(instance),
   });
@@ -18,22 +24,33 @@ export async function testConnection(instance: AlertmanagerInstance): Promise<vo
   }
 }
 
-export async function fetchAlerts(instance: AlertmanagerInstance): Promise<Alert[]> {
-  const response = await fetch(`${instance.url}/api/v2/alerts?silenced=false&inhibited=false`, {
-    headers: headers(instance),
-  });
+export async function fetchAlerts(
+  instance: AlertmanagerInstance,
+): Promise<Alert[]> {
+  const response = await fetch(
+    `${instance.url}/api/v2/alerts?silenced=false&inhibited=false`,
+    {
+      headers: headers(instance),
+    },
+  );
   if (!response.ok) {
-    throw new Error(`${instance.name}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `${instance.name}: ${response.status} ${response.statusText}`,
+    );
   }
   return (await response.json()) as Alert[];
 }
 
-export async function fetchAllAlerts(instance: AlertmanagerInstance): Promise<Alert[]> {
+export async function fetchAllAlerts(
+  instance: AlertmanagerInstance,
+): Promise<Alert[]> {
   const response = await fetch(`${instance.url}/api/v2/alerts`, {
     headers: headers(instance),
   });
   if (!response.ok) {
-    throw new Error(`${instance.name}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `${instance.name}: ${response.status} ${response.statusText}`,
+    );
   }
   return (await response.json()) as Alert[];
 }
@@ -68,22 +85,31 @@ export async function createSilence(
   return (await response.json()) as { silenceID: string };
 }
 
-export async function fetchSilences(instance: AlertmanagerInstance): Promise<Silence[]> {
+export async function fetchSilences(
+  instance: AlertmanagerInstance,
+): Promise<Silence[]> {
   const response = await fetch(`${instance.url}/api/v2/silences`, {
     headers: headers(instance),
   });
   if (!response.ok) {
-    throw new Error(`${instance.name}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `${instance.name}: ${response.status} ${response.statusText}`,
+    );
   }
   return (await response.json()) as Silence[];
 }
 
-export async function expireSilence(instance: AlertmanagerInstance, silenceId: string): Promise<void> {
+export async function expireSilence(
+  instance: AlertmanagerInstance,
+  silenceId: string,
+): Promise<void> {
   const response = await fetch(`${instance.url}/api/v2/silence/${silenceId}`, {
     method: "DELETE",
     headers: headers(instance),
   });
   if (!response.ok) {
-    throw new Error(`${instance.name}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `${instance.name}: ${response.status} ${response.statusText}`,
+    );
   }
 }

@@ -1,8 +1,30 @@
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { AlertmanagerInstance, AlertWithInstance, SILENCE_DURATIONS, SilenceMatcher } from "./types";
+import {
+  AlertmanagerInstance,
+  AlertWithInstance,
+  SILENCE_DURATIONS,
+  SilenceMatcher,
+} from "./types";
 import { createSilence } from "./api";
-import { getLastSilenceAuthor, getLastSilenceComment, getLastSilenceDuration, setLastSilenceAuthor, setLastSilenceComment, setLastSilenceDuration } from "./storage";
+import {
+  getLastSilenceAuthor,
+  getLastSilenceComment,
+  getLastSilenceDuration,
+  setLastSilenceAuthor,
+  setLastSilenceComment,
+  setLastSilenceDuration,
+} from "./storage";
 
 interface LabelEntry {
   key: string;
@@ -26,7 +48,9 @@ function collectUniqueLabels(alerts: AlertWithInstance[]): LabelEntry[] {
   return labels;
 }
 
-function collectUniqueInstances(alerts: AlertWithInstance[]): AlertmanagerInstance[] {
+function collectUniqueInstances(
+  alerts: AlertWithInstance[],
+): AlertmanagerInstance[] {
   const map = new Map<string, AlertmanagerInstance>();
   for (const alert of alerts) {
     map.set(alert.instance.id, alert.instance);
@@ -59,15 +83,16 @@ export function SilenceLabelForm({
     });
   }
 
-  const continueTarget = selected.size > 0 ? (
-    <SilenceLabelConfirm
-      selectedLabels={uniqueLabels.filter((l) => selected.has(l.id))}
-      instances={instances}
-      onSilenced={onSilenced}
-      popLabelPicker={popLabelPicker}
-      popParent={popParent}
-    />
-  ) : undefined;
+  const continueTarget =
+    selected.size > 0 ? (
+      <SilenceLabelConfirm
+        selectedLabels={uniqueLabels.filter((l) => selected.has(l.id))}
+        instances={instances}
+        onSilenced={onSilenced}
+        popLabelPicker={popLabelPicker}
+        popParent={popParent}
+      />
+    ) : undefined;
 
   return (
     <List
@@ -83,7 +108,11 @@ export function SilenceLabelForm({
             accessories={[{ tag: { value: "Enter", color: Color.Green } }]}
             actions={
               <ActionPanel>
-                <Action.Push title="Continue" icon={Icon.ArrowRight} target={continueTarget} />
+                <Action.Push
+                  title="Continue"
+                  icon={Icon.ArrowRight}
+                  target={continueTarget}
+                />
               </ActionPanel>
             }
           />
@@ -96,7 +125,11 @@ export function SilenceLabelForm({
             <List.Item
               key={label.id}
               title={label.id}
-              icon={isSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+              icon={
+                isSelected
+                  ? { source: Icon.Checkmark, tintColor: Color.Green }
+                  : Icon.Circle
+              }
               actions={
                 <ActionPanel>
                   <Action
@@ -145,17 +178,23 @@ function SilenceLabelConfirm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    Promise.all([getLastSilenceDuration(), getLastSilenceAuthor(), getLastSilenceComment()]).then(
-      ([d, a, c]) => {
-        setLastDuration(String(d));
-        setLastAuthor(a);
-        setLastComment(c);
-        setIsLoaded(true);
-      },
-    );
+    Promise.all([
+      getLastSilenceDuration(),
+      getLastSilenceAuthor(),
+      getLastSilenceComment(),
+    ]).then(([d, a, c]) => {
+      setLastDuration(String(d));
+      setLastAuthor(a);
+      setLastComment(c);
+      setIsLoaded(true);
+    });
   }, []);
 
-  async function handleSubmit(values: { duration: string; createdBy: string; comment: string }) {
+  async function handleSubmit(values: {
+    duration: string;
+    createdBy: string;
+    comment: string;
+  }) {
     if (!values.createdBy.trim()) {
       await showToast(Toast.Style.Failure, "Author is required");
       return;
@@ -177,7 +216,15 @@ function SilenceLabelConfirm({
       const durationHours = Number(values.duration);
 
       await Promise.all(
-        instances.map((inst) => createSilence(inst, matchers, durationHours, values.createdBy, values.comment)),
+        instances.map((inst) =>
+          createSilence(
+            inst,
+            matchers,
+            durationHours,
+            values.createdBy,
+            values.comment,
+          ),
+        ),
       );
 
       await Promise.all([
@@ -187,7 +234,11 @@ function SilenceLabelConfirm({
       ]);
 
       const instanceNames = instances.map((i) => i.name).join(", ");
-      await showToast(Toast.Style.Success, "Silence Created", `${selectedLabels.map((l) => l.id).join(", ")} on ${instanceNames}`);
+      await showToast(
+        Toast.Style.Success,
+        "Silence Created",
+        `${selectedLabels.map((l) => l.id).join(", ")} on ${instanceNames}`,
+      );
       onSilenced?.();
       pop();
       popLabelPicker();
@@ -210,18 +261,42 @@ function SilenceLabelConfirm({
     >
       {isLoaded && (
         <>
-          <Form.Description title="Labels" text={selectedLabels.map((l) => l.id).join("\n")} />
-          <Form.Description title="Instances" text={instances.map((i) => i.name).join(", ")} />
+          <Form.Description
+            title="Labels"
+            text={selectedLabels.map((l) => l.id).join("\n")}
+          />
+          <Form.Description
+            title="Instances"
+            text={instances.map((i) => i.name).join(", ")}
+          />
           <Form.Separator />
 
-          <Form.Dropdown id="duration" title="Duration" defaultValue={lastDuration}>
+          <Form.Dropdown
+            id="duration"
+            title="Duration"
+            defaultValue={lastDuration}
+          >
             {SILENCE_DURATIONS.map((d) => (
-              <Form.Dropdown.Item key={d.value} title={d.title} value={String(d.value)} />
+              <Form.Dropdown.Item
+                key={d.value}
+                title={d.title}
+                value={String(d.value)}
+              />
             ))}
           </Form.Dropdown>
 
-          <Form.TextField id="createdBy" title="Author" placeholder="your name or email" defaultValue={lastAuthor} />
-          <Form.TextArea id="comment" title="Comment" placeholder="Reason for silencing..." defaultValue={lastComment} />
+          <Form.TextField
+            id="createdBy"
+            title="Author"
+            placeholder="your name or email"
+            defaultValue={lastAuthor}
+          />
+          <Form.TextArea
+            id="comment"
+            title="Comment"
+            placeholder="Reason for silencing..."
+            defaultValue={lastComment}
+          />
         </>
       )}
     </Form>

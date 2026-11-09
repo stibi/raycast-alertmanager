@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import { AlertmanagerInstance, AlertWithInstance } from "./types";
 import { AlertDetail } from "./alert-detail";
 import { SilenceForm } from "./silence-form";
@@ -16,7 +23,10 @@ const INSTANCE_COLORS: Color[] = [
   Color.PrimaryText,
 ];
 
-function instanceColor(instances: AlertmanagerInstance[], instanceId: string): Color {
+function instanceColor(
+  instances: AlertmanagerInstance[],
+  instanceId: string,
+): Color {
   const index = instances.findIndex((i) => i.id === instanceId);
   return INSTANCE_COLORS[index >= 0 ? index % INSTANCE_COLORS.length : 0];
 }
@@ -34,7 +44,10 @@ export function AlertGroupList({
 }) {
   const { pop: popGroupList } = useNavigation();
   return (
-    <List navigationTitle={`${alertname} (${alerts.length})`} searchBarPlaceholder="Filter alerts...">
+    <List
+      navigationTitle={`${alertname} (${alerts.length})`}
+      searchBarPlaceholder="Filter alerts..."
+    >
       {alerts.map((alert) => {
         const color = instanceColor(instances, alert.instance.id);
         const severity = alert.labels.severity;
@@ -47,19 +60,29 @@ export function AlertGroupList({
           <List.Item
             key={`${alert.instance.id}-${alert.fingerprint}`}
             title={distinguishingLabels || alertname}
-            subtitle={alert.annotations.summary || alert.annotations.description || ""}
+            subtitle={
+              alert.annotations.summary || alert.annotations.description || ""
+            }
             keywords={[alert.instance.name, ...Object.values(alert.labels)]}
             accessories={[
               severity
                 ? {
                     tag: {
                       value: severity,
-                      color: severity === "critical" ? Color.Red : severity === "warning" ? Color.Orange : Color.Yellow,
+                      color:
+                        severity === "critical"
+                          ? Color.Red
+                          : severity === "warning"
+                            ? Color.Orange
+                            : Color.Yellow,
                     },
                   }
                 : {},
               { tag: { value: alert.instance.name, color } },
-              { date: new Date(alert.startsAt), tooltip: `Started: ${new Date(alert.startsAt).toLocaleString()}` },
+              {
+                date: new Date(alert.startsAt),
+                tooltip: `Started: ${new Date(alert.startsAt).toLocaleString()}`,
+              },
             ]}
             actions={
               <ActionPanel>
@@ -79,7 +102,13 @@ export function AlertGroupList({
                   title="Silence by Label"
                   icon={Icon.Tag}
                   shortcut={{ modifiers: ["cmd"], key: "l" }}
-                  target={<SilenceLabelForm alerts={[alert]} onSilenced={onSilenced} popParent={popGroupList} />}
+                  target={
+                    <SilenceLabelForm
+                      alerts={[alert]}
+                      onSilenced={onSilenced}
+                      popParent={popGroupList}
+                    />
+                  }
                 />
               </ActionPanel>
             }

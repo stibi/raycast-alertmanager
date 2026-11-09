@@ -4,7 +4,13 @@ import { SilenceForm } from "./silence-form";
 import { InstantSilenceAction } from "./instant-silence";
 import { SilenceLabelForm } from "./silence-label-form";
 
-export function AlertDetail({ alert, instanceColor }: { alert: AlertWithInstance; instanceColor: Color }) {
+export function AlertDetail({
+  alert,
+  instanceColor,
+}: {
+  alert: AlertWithInstance;
+  instanceColor: Color;
+}) {
   const alertname = alert.labels.alertname || "Unknown Alert";
 
   const labelRows = Object.entries(alert.labels)
@@ -41,7 +47,10 @@ ${alert.generatorURL ? `[Open in source](${alert.generatorURL})` : ""}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Instance">
-            <Detail.Metadata.TagList.Item text={alert.instance.name} color={instanceColor} />
+            <Detail.Metadata.TagList.Item
+              text={alert.instance.name}
+              color={instanceColor}
+            />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item
@@ -65,9 +74,15 @@ ${alert.generatorURL ? `[Open in source](${alert.generatorURL})` : ""}
           )}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Fingerprint" text={alert.fingerprint} />
-          <Detail.Metadata.Label title="Started" text={new Date(alert.startsAt).toLocaleString()} />
+          <Detail.Metadata.Label
+            title="Started"
+            text={new Date(alert.startsAt).toLocaleString()}
+          />
           {alert.receivers.length > 0 && (
-            <Detail.Metadata.Label title="Receivers" text={alert.receivers.map((r) => r.name).join(", ")} />
+            <Detail.Metadata.Label
+              title="Receivers"
+              text={alert.receivers.map((r) => r.name).join(", ")}
+            />
           )}
         </Detail.Metadata>
       }
@@ -87,9 +102,17 @@ ${alert.generatorURL ? `[Open in source](${alert.generatorURL})` : ""}
             target={<SilenceLabelForm alerts={[alert]} />}
           />
           {alert.generatorURL && (
-            <Action.OpenInBrowser title="Open in Source" url={alert.generatorURL} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenInBrowser
+              title="Open in Source"
+              url={alert.generatorURL}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
           )}
-          <Action.CopyToClipboard title="Copy Alert Name" content={alertname} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard
+            title="Copy Alert Name"
+            content={alertname}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
         </ActionPanel>
       }
     />
